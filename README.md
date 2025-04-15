@@ -1,3 +1,4 @@
+
 # Project
 ⚙️ The project to practice configuring Jenkins with `.yml` file, and also to create jobs with `Job DSL`. 
 
@@ -200,6 +201,12 @@ job('Tools/clone-repository') {
     }
 }
 ```
+> [!TIP]
+> Where can you find cloned files? Jenkins creates a folder `workspace` in home directory (in this case, `/var/jenkins_home`, and then creates a folder with a name of a job. So full name in this case is `/var/jenkins_home/workspace/Tools/clone-repository/`
+
+> [!TIP]
+> In UI, you can also find copied files. In you Job, go to `Workspaces`, and there you will find all files
+
 - `dsl {...}` - tells Jenkins this job will use Job DSL to define and create another job.
 - `text(''' ''')` - allows writing raw Groovy code inside a multi-line string
 - `scm {...}` - defines the source control (also called Version Control, it’s a system that tracks changes to your code over time. Most popular - git). In example below: connects to a GitHub repo, check out the main branch, and use that source code in the job.
