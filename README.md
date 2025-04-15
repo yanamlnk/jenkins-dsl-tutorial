@@ -1,6 +1,20 @@
 # Project
 ⚙️ The project to practice configuring Jenkins with `.yml` file, and also to create jobs with `Job DSL`. 
 
+- [Launch the project](#launch-the-project)
+- [File Structure](#file-structure)
+- [Docker files](#docker-files)
+  - [Plugins](#plugins)
+  - [Dockerfile](#dockerfile)
+  - [Docker Compose](#docker-compose)
+- [YAML file](#yaml-file)
+  - [JCasC](#jcasc)
+  - [Useful links](#useful-links)
+  - [Elements of YAML](#elements-of-yaml)
+- [Groovy file](#groovy-file)
+  - [Job DSL](#job-dsl)
+  - [DSL Components](#dsl-components)
+
 # Launch the project
 1. Create `.env` file with the following values:
 ```
@@ -226,7 +240,7 @@ job('Tools/SEED') {
 ```
 
 > [!TIP]
-> P.S. For SEED job to work, you need either to approve the created dsl script as admin, or you can deactivate this verification: Dashboard -> Manage Jenkins -> Security -> Enable script security for Job DSL scripts
+> P.S. For SEED job to work, you need either to approve the created dsl script as admin, or you can deactivate this verification: `Dashboard` -> `Manage Jenkins` -> `Security` -> `Enable script security for Job DSL scripts`
 
 > [!TIP]
 > P.S.S. `(* * * * *)` means `MINUTE HOUR DAY MONTH DAY_OF_WEEK`
