@@ -30,7 +30,7 @@ docker-compose up
 - `Dockerfile`, `docker-compose.yml`, and `plugins.txt` - files used by Docker to launch the project
 - `my_marvin.yml` - file to configure Jenkins (roles, users)
 - `job_dsl.groovy` - file describing jobs
-- 'Makefile' - for tests
+- `Makefile` - for tests
 
 # Docker files
 ## Plugins
@@ -92,4 +92,141 @@ services:
 
 # YAML file
 
+## JCasC
+Jenkins Configuration as Code (or JCasC) lets you configure Jenkins using a YAML file, instead of clicking through the web UI.
+You can define things like:
+
+- Users & passwords
+- Roles and permissions
+- System settings (welcome message, etc.)
+- Predefined jobs or pipelines
+
+## Useful links
+1. [Example of yaml](https://github.com/jenkinsci/configuration-as-code-plugin/tree/7c3138e7575e425610317c76f502534cfe3804be/demos) with different configuration
+2. Once the Jenkins is accessible in localhost, you can use endpoint `http://localhost:8080/manage/configuration-as-code/reference` to access all possible configurations
+3. [Permissions](https://www.jenkins.io/doc/book/security/access-control/permissions/)
+
+## Elements of YAML
+- `jenkins: systemMessage:` - shows system message
+- `jenkins: securityRealm:` - manages Users and Logins
+  - Disables public sign-up (`allowsSignup: false`)
+  - Defines four users with their names and passwords provided via environment variables. This way, passwords aren't hardcoded
+  - `chocolateen`, `vaugie_g`, etc. are the login usernames
+```
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "chocolateen"
+          name: "Hugo"
+          password: "${USER_CHOCOLATEEN_PASSWORD}"
+```
+- `jenkins: authorizationStrategy:`
+  - Uses a Role-Based Authorization Strategy plugin
+  - Defines 4 roles: `admin`: full control, assigned to `chocolateen`, `ape`: can view and build jobs, assigned to `i_dont_know`, `gorilla`: power users, can manage jobs, assigned to `vaugie_g`, `assist`: limited access, mostly viewing, assigned to `nasso`
+  - each role: has a name, a description, lists permissions and which users get that role (`entries`)
+```
+  authorizationStrategy: 
+    roleBased:
+      roles:
+        global:
+          - name: "admin"
+            permissions:
+              - "Overall/Administer"
+            entries:
+              - user: "chocolateen"
+```              
+- `jobs:` 
+  - loads a Groovy file that defines Jenkins jobs using Job DSL plugin
+  - creates any jobs described in it automatically
+
+```
+jobs:
+  - file: /var/jenkins_home/job_dsl.groovy
+```
+
 # Groovy file
+## Job DSL
+Job DSL (Domain-Specific Language) is a Jenkins plugin that lets you create and manage Jenkins jobs using code — specifically, Groovy scripts.
+
+Instead of manually creating jobs in the Jenkins UI, you can define them as code, store them in git, and automatically generate them when Jenkins starts.
+
+📌 [Docs](https://jenkinsci.github.io/job-dsl-plugin/)
+
+## DSL Components
+- `folder('path/name'){...}` - to create a folder
+- `description()` - to give a description for the element
+
+```
+folder('Tools') {
+    description('Folder for miscellaneous tools.')
+}
+```
+
+- `job('path/name'){...}` to declare a job
+- `parameters{...}` - defines input parameters for a job
+- `stringParam(name, default_value, description)` - string parameter 
+- `steps{...}` - the commands or actions Jenkins will run when executing the job
+- `shell('command')` - runs a shell command in the build environment
+- `wrappers { ... }` - adds optional "extras" around your job
+- `preBuildCleanup()` - deletes the workspace before the job starts. Prevents leftover files from previous runs
+
+```
+job('Tools/clone-repository') {
+    parameters {
+        stringParam('GIT_REPOSITORY_URL', '',  'Git URL of the repository to clone')
+    }
+
+    steps {
+        shell('git clone "$GIT_REPOSITORY_URL"')
+    }
+
+    wrappers {
+        preBuildCleanup() 
+    }
+}
+```
+- `dsl {...}` - tells Jenkins this job will use Job DSL to define and create another job.
+- `text(''' ''')` - allows writing raw Groovy code inside a multi-line string
+- `scm {...}` - defines the source control (also called Version Control, it’s a system that tracks changes to your code over time. Most popular - git). In example below: connects to a GitHub repo, check out the main branch, and use that source code in the job.
+- `github(name, branch)` - clones the GitHub repo specified by the name, checks out the specified branch
+- `triggers {...}` - adds build triggers to the job.
+- `scm('* * * * *')` - sets up SCM polling, which checks for changes in the repo every minute `(* * * * *)` and triggers the job if anything has changed.
+```
+job('Tools/SEED') {
+    parameters {
+        stringParam('GITHUB_NAME', '', 'GitHub repository owner/repo_name (e.g.: "EpitechIT31000/chocolatine")')
+        stringParam('DISPLAY_NAME', '', 'Display name for the job')
+    }
+
+    steps {
+        dsl {
+            text('''
+                job(DISPLAY_NAME) {
+                    scm {
+                        github(GITHUB_NAME, '*/main')
+                    }
+                    triggers {
+                        scm('* * * * *')
+                    }
+                    steps {
+                        shell('make fclean')
+                        shell('make')
+                        shell('make tests_run')
+                        shell('make clean')
+                    }
+                    wrappers {
+                        preBuildCleanup()
+                    }
+                }
+            ''')
+        }
+    }
+}
+```
+
+> [!TIP]
+> P.S. For SEED job to work, you need either to approve the created dsl script as admin, or you can deactivate this verification: Dashboard -> Manage Jenkins -> Security -> Enable script security for Job DSL scripts
+
+> [!TIP]
+> P.S.S. `(* * * * *)` means `MINUTE HOUR DAY MONTH DAY_OF_WEEK`
