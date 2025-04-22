@@ -252,7 +252,7 @@ job('Tools/SEED') {
 > [!TIP]
 > P.S.S. `(* * * * *)` means `MINUTE HOUR DAY MONTH DAY_OF_WEEK`
 
-> [!INFO]
+> [!TIP]
 > The syntax `*/main` in Jenkins refers to a branch pattern used by Jenkins' GitHub plugin.
 > - `*`: This is a wildcard character used to match any remote reference (i.e., any branch, tag, etc.) in your repository. It tells Jenkins to look for the main branch in any remote repository (whether it's origin, or any other configured remotes).
 > - `main`: This is the actual name of the branch you want Jenkins to track, in this case, the main branch.
