@@ -150,7 +150,19 @@ You can define things like:
               - "Overall/Administer"
             entries:
               - user: "chocolateen"
-```              
+```
+Permissions: 
+- Overall/Read: Can log in and view Jenkins
+- Job/Read: Can see job configuration and builds
+- Job/Build: Can trigger a build manually
+- Job/Workspace: Can browse the workspace of a job
+- Job/Create: Can create new jobs
+- Job/Configure: Can modify job configuration
+- Job/Delete: Can delete jobs
+- Job/Move: Can move jobs between folders
+- Job/Cancel: Can abort running builds
+
+
 - `jobs:` 
   - loads a Groovy file that defines Jenkins jobs using Job DSL plugin
   - creates any jobs described in it automatically
